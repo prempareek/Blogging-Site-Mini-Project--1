@@ -28,10 +28,10 @@ const authorisationUser=function(req,res,next)
   let token = req.headers["x-api-key"];
 
   let decodedToken = jwt.verify(token, "functionup-thorium-group5");
-console.log(decodedToken)
+//console.log(decodedToken)
   let authorisedUser=decodedToken.authorId;
   let logedInUser=req.params.authorId;
-  console.log(authorisedUser,logedInUser)
+ // console.log(authorisedUser,logedInUser)
   if(authorisedUser!==logedInUser) return res.status(401).send({status:false,msg:"You are not an authorized person to make these changes"})
   next();  
 }
