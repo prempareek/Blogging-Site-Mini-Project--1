@@ -135,7 +135,7 @@ if((tagsUpdates===undefined)&&(subCatUpdates!==undefined))
     let newArr=arr.concat(subCatUpdates);
     let updation2=await BlogsModel.findOneAndUpdate(
         {_id:blogId},
-        { $set:{tags:newArr}},// isPublished:true, publishedAt:Date.now }},
+        { $set:{subcategory:newArr}},// isPublished:true, publishedAt:Date.now }},
         {new:true}
     )
     return res.status(200).send({status:true,data:updation2})
