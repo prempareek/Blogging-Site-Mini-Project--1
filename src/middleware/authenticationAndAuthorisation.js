@@ -18,7 +18,7 @@ const authenticationUser=function(req,res,next)
 }
 catch(error)
 {
-  res.send({msg:error.message})
+  res.send({msg:"Error", error:error.message})
 }
 }
 
@@ -37,7 +37,7 @@ const authorisationUser=function(req,res,next)
 }
 catch(error)
 {
-  return res.send({msg:error.message})
+  return res.send({msg:"Error", error:error.message})
 }
 }
 module.exports.authenticationUser = authenticationUser;

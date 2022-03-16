@@ -9,10 +9,10 @@ const createAuthor= async function(req,res)
     let email = data.email;
     if(validator.validate(email)== false)
     {
-        return res.status(400).send({msg: "Please input a valid email"})
+        return res.status(400).send({status:false, msg: "Please input a valid email"})
     }
     let savedData= await AuthorModel.create(data);
-   return  res.status(201).send(savedData)
+   return  res.status(201).send({status:true,data:savedData})
 }
 catch(error){
     return res.status(500).send({msg: "Error", error:error.message})
@@ -26,11 +26,11 @@ const loginUser = async function (req, res) {
   //validating emailId and password which is entered by user with the DB collection of user
   if(!userName || !password)
   {
-    return res.status(400).send({msg:"email and password must be present"})
+    return res.status(400).send({status:false, msg:"email and password must be present"})
   }
     let author = await AuthorModel.findOne({ email: userName, password: password });
-    if (!author)
-      return res.status(400).send({
+    if (Object.keys(author).length===0)
+      return res.status(404).send({
         status: false,
         msg: "username or the password is not correct",
       });
@@ -38,8 +38,6 @@ const loginUser = async function (req, res) {
       let token = jwt.sign(
       {
         authorId: author._id.toString(),//extracting id from user variable defined above and converting it to string
-        batch: "thorium",
-        organisation: "FUnctionUp",
       },
       "functionup-thorium-group5"
       
@@ -53,7 +51,7 @@ const loginUser = async function (req, res) {
   }
   catch(error)
   {
-    res.status(500).send({Error:error.message})
+    res.status(500).send({msg: "Error", Error:error.message})
   }
   };
 module.exports.createAuthor=createAuthor;
