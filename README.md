@@ -24,6 +24,7 @@ Return HTTP status 201 on a succesful blog creation. Also return the blog docume
 Create atleast 5 blogs for each author
 Return HTTP status 400 for an invalid request with a response body like this
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #GET /blogs  
 Returns all blogs in the collection that aren't deleted and are published
 Return the HTTP status 200 if any documents are found. The response structure should be like this
