@@ -70,20 +70,107 @@ if(!validBlog)
 {
     return res.status(400).send({status:"false", msg:"Enter a valid Blog Id"})
 }
-let updations= await BlogsModel.findOneAndUpdate(
-    {_id:blogId},
-    { $set:body},// isPublished:true, publishedAt:Date.now }},
-    {new:true}
-)
-if(updations.isPublished==true)
+let tagsUpdates=body.tags;
+let subCatUpdates=body.subcategory;
+if((tagsUpdates===undefined)&&(subCatUpdates===undefined))
 {
-    let publishDate= await BlogsModel.findOneAndUpdate(
-        {_id:blogId}, {publishedAt:Date.now()},{new:true})
-        return res.status(200).send({status:true,data:publishDate})
-        
-}
-return res.status(200).send({status:true,data:updations})
+    let updations= await BlogsModel.findOneAndUpdate(
+        {_id:blogId},
+        { $set:body},// isPublished:true, publishedAt:Date.now }},
+        {new:true}
+    )
+    if(updations.isPublished==true)
+    {
+        let publishDate= await BlogsModel.findOneAndUpdate(
+            {_id:blogId}, {publishedAt:Date.now()},{new:true})
+            return res.status(200).send({status:true,data:publishDate})
+            
     }
+    return res.status(200).send({status:true,data:updations})
+        }
+
+
+if((tagsUpdates!==undefined)&&(subCatUpdates===undefined))
+{
+    delete body.tags;
+    let updations= await BlogsModel.findOneAndUpdate(
+        {_id:blogId},
+        { $set:body},// isPublished:true, publishedAt:Date.now }},
+        {new:true}
+    )
+    if(updations.isPublished==true)
+    {
+        let publishDate= await BlogsModel.findOneAndUpdate(
+            {_id:blogId}, {publishedAt:Date.now()},{new:true})
+            //return res.status(200).send({status:true,data:publishDate})
+            
+    }
+    let arr=updations.tags;
+    let newArr=arr.concat(tagsUpdates);
+    let updation2=await BlogsModel.findOneAndUpdate(
+        {_id:blogId},
+        { $set:{tags:newArr}},// isPublished:true, publishedAt:Date.now }},
+        {new:true}
+    )
+    return res.status(200).send({status:true,data:updation2})
+
+}
+
+if((tagsUpdates===undefined)&&(subCatUpdates!==undefined))
+{
+    delete body.subcategory;
+    let updations= await BlogsModel.findOneAndUpdate(
+        {_id:blogId},
+        { $set:body},// isPublished:true, publishedAt:Date.now }},
+        {new:true}
+    )
+    if(updations.isPublished==true)
+    {
+        let publishDate= await BlogsModel.findOneAndUpdate(
+            {_id:blogId}, {publishedAt:Date.now()},{new:true})
+            //return res.status(200).send({status:true,data:publishDate})
+            
+    }
+    let arr=updations.subcategory;
+    let newArr=arr.concat(subCatUpdates);
+    let updation2=await BlogsModel.findOneAndUpdate(
+        {_id:blogId},
+        { $set:{tags:newArr}},// isPublished:true, publishedAt:Date.now }},
+        {new:true}
+    )
+    return res.status(200).send({status:true,data:updation2})
+
+}
+
+if((tagsUpdates!==undefined)&&(subCatUpdates!==undefined))
+{
+    delete body.tags;
+    delete body.subcategory;
+    let updations= await BlogsModel.findOneAndUpdate(
+        {_id:blogId},
+        { $set:body},// isPublished:true, publishedAt:Date.now }},
+        {new:true}
+    )
+    if(updations.isPublished==true)
+    {
+        let publishDate= await BlogsModel.findOneAndUpdate(
+            {_id:blogId}, {publishedAt:Date.now()},{new:true})
+            //return res.status(200).send({status:true,data:publishDate})
+            
+    }
+    let arr=updations.tags;
+    let arr1=updations.subcategory;
+    let newArr=arr.concat(tagsUpdates);
+    let newArr1=arr1.concat(subCatUpdates);
+    let updation2=await BlogsModel.findOneAndUpdate(
+        {_id:blogId},
+        { $set:{tags:newArr, subcategory:newArr1}},// isPublished:true, publishedAt:Date.now }},
+        {new:true}
+    )
+    return res.status(200).send({status:true,data:updation2})
+
+}
+}
 catch(error){
     return res.status(500).send({msg: "Error", error:error.message})
 }
