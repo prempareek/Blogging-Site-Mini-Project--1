@@ -8,7 +8,7 @@ const authenticationUser=function(req,res,next)
     if (!token) return res.status(400).send({ status: false, msg: "token must be present" });
 
  let decodedToken = jwt.verify(token, "functionup-thorium-group5");//verifying token with secret key
- //console.log(decodedToken)
+ 
 
   if (!decodedToken)
     return res.status(400).send({ status: false, msg: "token is invalid" });//validating token value inside decodedToken
@@ -28,10 +28,10 @@ const authorisationUser=function(req,res,next)
   let token = req.headers["x-api-key"];
 
   let decodedToken = jwt.verify(token, "functionup-thorium-group5");
-//console.log(decodedToken)
+
   let authorisedUser=decodedToken.authorId;
   let logedInUser=req.params.authorId;
- // console.log(authorisedUser,logedInUser)
+ 
   if(authorisedUser!==logedInUser) return res.status(401).send({status:false,msg:"You are not an authorized person to make these changes"})
   next();  
 }

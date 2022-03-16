@@ -8,7 +8,7 @@ const createBlogs= async function(req,res)
         let data=req.body;
         let author=data.authorId;
         let validAuthor= await AuthorModel.find({_id:author})
-        if(!validAuthor)
+        if(Object.keys(validAuthor).length===0)
             {
                 return res.status(400).send({status:false, msg:"Enter a valid author"})
             }
@@ -81,6 +81,9 @@ const updateBlogs= async function(req, res)
         {
             let blogId=req.params.blogId;
             let body=req.body;
+            if(Object.keys(body).length===0){
+                return res.status(400).send({status: false, msg: "Enter Data to update."})
+            }
             let validBlog= await BlogsModel.findOne({$and:[{_id:blogId}, {isDeleted:false}]})
             if(Object.keys(validBlog).length===0)
                 {
@@ -98,7 +101,6 @@ const updateBlogs= async function(req, res)
                     }
                 return res.status(200).send({status:true, data:updations})
                 }
-
 
             if((tagsUpdates!==undefined)&&(subCatUpdates===undefined))
                 {
@@ -187,7 +189,7 @@ const deleteBlogById= async function(req,res)
         {$set:{isDeleted:true,deletedAt:Date.now()}},
         {new:true}
     )
-    if(!validBlog)
+    if(Object.keys(validBlog).length===0)
     {
         return res.status(404).send({status:false, msg:"No such blog exists"})
     }
