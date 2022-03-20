@@ -6,10 +6,18 @@ const createAuthor= async function(req,res)
 {
     try{
     let data=req.body;
+    if(Object.keys(data).length===0){
+      return res.status(400).send({status:false, msg: "Please input some data to create"})
+    } 
     let email = data.email;
-    if(validator.validate(email)== false)
+    if(validator.validate(email.trim())== false)
     {
         return res.status(400).send({status:false, msg: "Please input a valid email"})
+    }
+    let duplicateEmail=await AuthorModel.findOne({email});
+    if(duplicateEmail)
+    {
+        return res.status(400).send({status:false, msg: "Email is already in use"})
     }
     let savedData= await AuthorModel.create(data);
    return  res.status(201).send({status:true,data:savedData})
@@ -29,11 +37,13 @@ const loginUser = async function (req, res) {
     return res.status(400).send({status:false, msg:"email and password must be present"})
   }
     let author = await AuthorModel.findOne({ email: userName, password: password });
-    if (Object.keys(author).length===0)
+    if (!author)
+    {
       return res.status(404).send({
         status: false,
         msg: "username or the password is not correct",
       });
+    }
   
       let token = jwt.sign(
       {

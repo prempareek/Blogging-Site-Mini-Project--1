@@ -11,14 +11,16 @@ const authenticationUser=function(req,res,next)
  
 
   if (!decodedToken)
-    return res.status(400).send({ status: false, msg: "token is invalid" });//validating token value inside decodedToken
+    return res.status(401).send({ status: false, msg: "token is invalid" });//validating token value inside decodedToken
+    req.authorId = decodedToken.authorId;
+
 
   next();
   
 }
 catch(error)
 {
-  res.send({msg:"Error", error:error.message})
+  res.status(500).send({msg:"Error", error:error.message})
 }
 }
 
@@ -37,7 +39,7 @@ const authorisationUser=function(req,res,next)
 }
 catch(error)
 {
-  return res.send({msg:"Error", error:error.message})
+  return res.status(500).send({msg:"Error", error:error.message})
 }
 }
 module.exports.authenticationUser = authenticationUser;

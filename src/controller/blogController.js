@@ -12,8 +12,14 @@ const createBlogs= async function(req,res)
             {
                 return res.status(400).send({status:false, msg:"Enter a valid author"})
             }
-        let savedData= await BlogsModel.create(data);
-        return res.status(201).send({status:true, data:savedData})
+    let blogCreated = await BlogsModel.create(data);
+    if(blogCreated.isPublished==true){
+      let blogUpdated = await BlogsModel.findOneAndUpdate({_id:blogCreated._id},{publishedAt: Date.now()},{new:true})
+      return res.status(201).send({status: true, data:blogUpdated})
+     }
+     return res.status(201).send({ status: true, data: blogCreated });
+    //  let savedData= await BlogsModel.create(data);
+    //  return res.status(201).send({status:true, data:savedData})
     }
     catch(error)
     {
@@ -31,12 +37,13 @@ const getBlogs= async function(req, res)
             if(blogs.length===0){
                 return res.status(404).send({status:false, msg:"Blogs not found."})
             }
-            return res.status(200).send({status: true, data: blogs})
+            let x=blogs.length;
+            return res.status(200).send({status: true, total:x,data: blogs})
             
         }
         if(filter.tags==undefined && filter.subcategory==undefined){
             let blogs = await BlogsModel.find({$and:[filter,{isDeleted:false},{isPublished: true}]}).populate("authorId")
-            if(blogs.length===0){
+            if(!blogs){
                 return res.status(404).send({status:false, msg:"Blogs not found."})
             }
             return res.status(200).send({status: true, data: blogs})
@@ -85,8 +92,8 @@ const updateBlogs= async function(req, res)
                 return res.status(400).send({status: false, msg: "Enter Data to update."})
             }
             let validBlog= await BlogsModel.findOne({$and:[{_id:blogId}, {isDeleted:false}]})
-            if(Object.keys(validBlog).length===0)
-                {
+            if(!validBlog)
+                            {
                     return res.status(404).send({status:false, msg:"Blog not found"})
                 }
             let tagsUpdates=body.tags;
@@ -184,12 +191,18 @@ const deleteBlogById= async function(req,res)
 {
     try{
     let blog=req.params.blogId;
+    
+    // let x=await BlogsModel.findOne({blog})
+    // if(!blog)
+    // {
+    //     return res.status(404).send({status:false, msg:"blog id is not valid"})
+    // }
     let validBlog=await BlogsModel.findOneAndUpdate(
         {_id:blog, isDeleted:false},
         {$set:{isDeleted:true,deletedAt:Date.now()}},
         {new:true}
     )
-    if(Object.keys(validBlog).length===0)
+    if(!validBlog)
     {
         return res.status(404).send({status:false, msg:"No such blog exists"})
     }
@@ -207,6 +220,13 @@ const deleteBlogByQueryParams= async function(req,res)
         
     try{
         let filter=req.query;
+        //let queryParams = req.query
+        let decodeId = req.authorId;
+        if (filter.authorId != decodeId) {
+            res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
+            return
+        }
+
         if(Object.keys(filter).length===0){
             return res.status(400).send({status: false, msg:"Please enter a valid category."})
         }
@@ -214,15 +234,21 @@ const deleteBlogByQueryParams= async function(req,res)
             let data= await BlogsModel.updateMany({$and:[filter, {isDeleted: false}]},
                     {$set:{isDeleted:true,deletedAt:Date.now()}},
                     {new:true})
-                if(data.length===0){
-                    return res.status(404).send({status:false,msg:"No data found"})    
+                    
+
+                if(data.length>0){
+                    return res.status(200).send({status:true, msg:"Blogs Deleteds"})
+                       
                 }
-            return res.status(200).send({status:true, msg:"Blogs Deleted"})
+                else{
+                    return res.status(404).send({status:false,msg:"No data found"}) 
+                }
+            
         }
         if(filter.tags!=undefined && filter.subcategory==undefined){
             let tags = filter.tags
             delete filter.tags;
-            let blogs = await BlogsModel.updateMany({$and:[{tags:{$in:[tags]}},filter]},
+            let blogs = await BlogsModel.updateMany({$and:[{tags:{$in:[tags]}},filter,{isDeleted: false}]},
                 {$set:{isDeleted:true,deletedAt:Date.now()}},
                 {new:true})
             if(blogs.length!==0){
@@ -233,7 +259,7 @@ const deleteBlogByQueryParams= async function(req,res)
         if(filter.tags==undefined && filter.subcategory!=undefined){
             let subCat = filter.subcategory
             delete filter.subcategory;
-            let blogs = await BlogsModel.updateMany({$and:[{subcategory:{$in:[subCat]}},filter]},
+            let blogs = await BlogsModel.updateMany({$and:[{subcategory:{$in:[subCat]}},filter,{isDeleted: false}]},
                 {$set:{isDeleted:true,deletedAt:Date.now()}},
                 {new:true})
             if(blogs.length!==0){
@@ -247,7 +273,7 @@ const deleteBlogByQueryParams= async function(req,res)
             let tags = filter.tags
             delete filter.subcategory;
             delete filter.tags
-            let blogs = await BlogsModel.updateMany({$and:[{tags:{$in:[tags]}},{subcategory:{$in:[subCat]}},filter]},
+            let blogs = await BlogsModel.updateMany({$and:[{tags:{$in:[tags]}},{subcategory:{$in:[subCat]}},filter,{isDeleted: false}]},
                 {$set:{isDeleted:true,deletedAt:Date.now()}},
                 {new:true})
             if(blogs.length!==0){
